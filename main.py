@@ -1,3 +1,4 @@
+# NOTE: this script is depracated, for Ajaib's web scrapping, use pangdat-scrapping.py
 import asyncio
 import aiohttp
 import pandas as pd
@@ -46,7 +47,7 @@ def push_to_database(df):
 
         for _, row in df.iterrows():
             sql = """
-                INSERT INTO orderbook (kode, side, price, lot, num, timestamp)
+                INSERT INTO orderbook_ajaib (kode, side, price, lot, num, timestamp)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """
             values = (row['kode'], row['side'], row['price'],

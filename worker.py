@@ -5,11 +5,10 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent
 JOBS = [
-    ("pangdat", SCRIPT_DIR / "pangdat-scraping.py"),
+    ("pangdat", SCRIPT_DIR / "main.py"),
     ("ipot", SCRIPT_DIR / "ipot_scrapping.py"),
 ]
 
-# FIXME: args not working man
 
 async def run_job(name: str, script: Path, interval: float):
     while True:

@@ -12,7 +12,7 @@ from playwright.async_api import TimeoutError, async_playwright
 load_dotenv()
 
 # STOCK_LIST = ['ANTM', 'BBCA', 'BBRI', 'BMRI', 'TLKM', 'ASII', 'UNVR', 'ICBP']
-STOCK_FILE = os.getenv("STOCK_FILE", "daftar 10 saham.xlsx")
+STOCK_FILE =  "Daftar 10 Saham.xlsx"
 
 # Parallel config
 NUM_BROWSERS = 2
@@ -192,7 +192,7 @@ async def scrape_with_one_browser(playwright, browser_id, codes):
     print(f"[BROWSER-{browser_id}] Handling {len(codes)} stocks")
     browser = None
     try:
-        browser = await playwright.chromium.launch(headless=HEADLESS)
+        browser = await playwright.firefox.launch(headless=HEADLESS)
         semaphore = asyncio.Semaphore(MAX_CONCURRENT_PER_BROWSER)
         tasks = [scrape_with_retry(browser, code, semaphore) for code in codes]
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -237,7 +237,7 @@ async def main():
     print("Orderbook Scraper - IPOT (parallel)")
     print(f"Targets: {len(STOCK_LIST)} | Browsers: {NUM_BROWSERS} | Concurrency/browser: {MAX_CONCURRENT_PER_BROWSER}")
     print(f"{'='*60}\n")
-
+    
     start = time.time()
     async with async_playwright() as p:
         success, failed = await scrape_all(p, STOCK_LIST)

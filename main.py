@@ -1,5 +1,6 @@
 # NOTE: this script is depracated, for Ajaib's web scrapping, use pangdat-scrapping.py
 import asyncio
+from socket import timeout
 import aiohttp
 import pandas as pd
 from datetime import datetime
@@ -120,7 +121,7 @@ async def login_and_get_headers(playwright):
 
     try:
         # Login
-        await page.goto(LOGIN_URL, timeout=15000)
+        await page.goto(LOGIN_URL, timeout=0)
         await page.fill('input[name=email]', EMAIL)
         await page.fill('input[name=password]', PASSWORD)
         await page.click('button[type=submit]')
@@ -141,7 +142,7 @@ async def login_and_get_headers(playwright):
 
         # Trigger API request
         print("📡 Triggering API request...")
-        await page.goto("https://invest.ajaib.co.id/home/saham/BBRI", wait_until="domcontentloaded")
+        await page.goto("https://invest.ajaib.co.id/home/saham/BBRI", wait_until="domcontentloaded", timeout=0)
 
         try:
             await asyncio.wait_for(headers_captured.wait(), timeout=10)

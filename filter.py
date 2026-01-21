@@ -44,34 +44,53 @@ class StockFilterGUI:
         filter_frame = ttk.LabelFrame(main_frame, text="Filters", padding="10")
         filter_frame.grid(row=1, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=10)
         
+        # Bid/Ask Ratio Filter
+        self.bid_ask_filter_var = tk.BooleanVar()
+        ttk.Label(filter_frame, text="Bid/Ask Filter:").grid(row=0, column=2, sticky=tk.W, padx=5, pady=5)
+        bid_ask_frame = ttk.Frame(filter_frame)
+        bid_ask_frame.grid(row=0, column=3, sticky=tk.W, padx=5, pady=5)
+        
+        ttk.Checkbutton(
+            bid_ask_frame,
+            text="Enable Bid ≥",
+            variable=self.bid_ask_filter_var
+        ).pack(side=tk.LEFT, padx=2)
+        
+        self.bid_multiplier_var = tk.StringVar(value="4")
+        multiplier_combo = ttk.Combobox(bid_ask_frame, textvariable=self.bid_multiplier_var, 
+                                       values=["2", "3", "4", "5", "6", "7", "8", "9", "10"], 
+                                       width=5, state="readonly")
+        multiplier_combo.pack(side=tk.LEFT, padx=2)
+        ttk.Label(bid_ask_frame, text="x Ask").pack(side=tk.LEFT, padx=2)
+        
         # Source selection
-        ttk.Label(filter_frame, text="Data Source:").grid(row=0, column=0, sticky=tk.W, padx=5)
+        ttk.Label(filter_frame, text="Data Source:").grid(row=1, column=0, sticky=tk.W, padx=5)
         self.source_var = tk.StringVar(value="ajaib")
         source_frame = ttk.Frame(filter_frame)
-        source_frame.grid(row=0, column=1, sticky=tk.W, padx=5)
+        source_frame.grid(row=1, column=1, sticky=tk.W, padx=5)
         ttk.Radiobutton(source_frame, text="Ajaib", variable=self.source_var, 
                        value="ajaib").pack(side=tk.LEFT, padx=5)
         ttk.Radiobutton(source_frame, text="IPOT", variable=self.source_var, 
                        value="ipot").pack(side=tk.LEFT, padx=5)
         
         # Stock code filter
-        ttk.Label(filter_frame, text="Stock Code:").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
+        ttk.Label(filter_frame, text="Stock Code:").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
         self.code_var = tk.StringVar()
         code_entry = ttk.Entry(filter_frame, textvariable=self.code_var, width=15)
-        code_entry.grid(row=1, column=1, sticky=tk.W, padx=5, pady=5)
-        ttk.Label(filter_frame, text="(Leave empty for all)").grid(row=1, column=2, sticky=tk.W, padx=5)
+        code_entry.grid(row=2, column=1, sticky=tk.W, padx=5, pady=5)
+        ttk.Label(filter_frame, text="(Leave empty for all)").grid(row=2, column=2, sticky=tk.W, padx=5)
         
         # Side filter
-        ttk.Label(filter_frame, text="Side:").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
+        ttk.Label(filter_frame, text="Side:").grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
         self.side_var = tk.StringVar(value="ALL")
         side_combo = ttk.Combobox(filter_frame, textvariable=self.side_var, 
-                                  values=["ALL", "B (Bid)", "A (Ask)"], width=12, state="readonly")
-        side_combo.grid(row=2, column=1, sticky=tk.W, padx=5, pady=5)
+                                  values=["ALL", "B (Bid)", "S (Sell/Ask)"], width=12, state="readonly")
+        side_combo.grid(row=3, column=1, sticky=tk.W, padx=5, pady=5)
         
         # Price range filter
-        ttk.Label(filter_frame, text="Price Range:").grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
+        ttk.Label(filter_frame, text="Price Range:").grid(row=4, column=0, sticky=tk.W, padx=5, pady=5)
         price_frame = ttk.Frame(filter_frame)
-        price_frame.grid(row=3, column=1, columnspan=2, sticky=tk.W, padx=5, pady=5)
+        price_frame.grid(row=4, column=1, columnspan=2, sticky=tk.W, padx=5, pady=5)
         
         self.price_min_var = tk.StringVar()
         self.price_max_var = tk.StringVar()
@@ -81,9 +100,9 @@ class StockFilterGUI:
         ttk.Entry(price_frame, textvariable=self.price_max_var, width=12).pack(side=tk.LEFT, padx=2)
         
         # Lot range filter
-        ttk.Label(filter_frame, text="Lot Range:").grid(row=4, column=0, sticky=tk.W, padx=5, pady=5)
+        ttk.Label(filter_frame, text="Lot Range:").grid(row=5, column=0, sticky=tk.W, padx=5, pady=5)
         lot_frame = ttk.Frame(filter_frame)
-        lot_frame.grid(row=4, column=1, columnspan=2, sticky=tk.W, padx=5, pady=5)
+        lot_frame.grid(row=5, column=1, columnspan=2, sticky=tk.W, padx=5, pady=5)
         
         self.lot_min_var = tk.StringVar()
         self.lot_max_var = tk.StringVar()
@@ -93,11 +112,11 @@ class StockFilterGUI:
         ttk.Entry(lot_frame, textvariable=self.lot_max_var, width=12).pack(side=tk.LEFT, padx=2)
         
         # Limit results
-        ttk.Label(filter_frame, text="Limit Results:").grid(row=5, column=0, sticky=tk.W, padx=5, pady=5)
+        ttk.Label(filter_frame, text="Limit Results:").grid(row=6, column=0, sticky=tk.W, padx=5, pady=5)
         self.limit_var = tk.StringVar(value="100")
         limit_combo = ttk.Combobox(filter_frame, textvariable=self.limit_var, 
                                    values=["100", "500", "1000", "5000", "ALL"], width=12, state="readonly")
-        limit_combo.grid(row=5, column=1, sticky=tk.W, padx=5, pady=5)
+        limit_combo.grid(row=6, column=1, sticky=tk.W, padx=5, pady=5)
         
         # Buttons
         button_frame = ttk.Frame(main_frame)
@@ -164,70 +183,54 @@ class StockFilterGUI:
             return None
     
     def build_query(self):
-        """Build SQL query based on filters"""
         source = self.source_var.get()
         table = f"orderbook_{source}"
-        
-        query = f"SELECT kode, side, price, lot, num, timestamp FROM {table} WHERE 1=1"
+
+        # Jika filter Bid >= Nx Ask aktif
+        if self.bid_ask_filter_var.get():
+            multiplier = self.bid_multiplier_var.get()
+            query = f"""
+            SELECT 
+                kode,
+                price,
+                SUM(CASE WHEN side = 'B' THEN lot ELSE 0 END) AS bid_lot,
+                SUM(CASE WHEN side = 'S' THEN lot ELSE 0 END) AS ask_lot,
+                MAX(timestamp) AS timestamp
+            FROM {table}
+            WHERE timestamp IS NOT NULL AND side IN ('B', 'S')
+            GROUP BY kode, price
+            HAVING bid_lot >= {multiplier} * ask_lot AND ask_lot > 0
+            ORDER BY timestamp DESC
+            """
+            params = []
+            return query, params
+
+        # Query normal
+        query = f"""
+            SELECT kode, side, price, lot, num, timestamp
+            FROM {table}
+            WHERE timestamp IS NOT NULL AND side IN ('B', 'S')
+        """
         params = []
-        
-        # Stock code filter
+
         code = self.code_var.get().strip().upper()
         if code:
             query += " AND kode = %s"
             params.append(code)
-        
-        # Side filter
+
         side = self.side_var.get()
         if side != "ALL":
-            side_char = side[0]  # Extract 'B' or 'A'
             query += " AND side = %s"
-            params.append(side_char)
-        
-        # Price range filter
-        try:
-            price_min = self.price_min_var.get().strip()
-            if price_min:
-                query += " AND price >= %s"
-                params.append(float(price_min))
-        except ValueError:
-            pass
-        
-        try:
-            price_max = self.price_max_var.get().strip()
-            if price_max:
-                query += " AND price <= %s"
-                params.append(float(price_max))
-        except ValueError:
-            pass
-        
-        # Lot range filter
-        try:
-            lot_min = self.lot_min_var.get().strip()
-            if lot_min:
-                query += " AND lot >= %s"
-                params.append(int(lot_min))
-        except ValueError:
-            pass
-        
-        try:
-            lot_max = self.lot_max_var.get().strip()
-            if lot_max:
-                query += " AND lot <= %s"
-                params.append(int(lot_max))
-        except ValueError:
-            pass
-        
-        # Order by timestamp (most recent first)
+            params.append(side[0])
+
         query += " ORDER BY timestamp DESC"
-        
-        # Limit
+
         limit = self.limit_var.get()
         if limit != "ALL":
             query += f" LIMIT {limit}"
-        
+
         return query, params
-    
+ 
     def apply_filter(self):
         """Apply filters and display results"""
         # Clear existing data
@@ -246,22 +249,47 @@ class StockFilterGUI:
             cursor = conn.cursor()
             cursor.execute(query, params)
             results = cursor.fetchall()
-            
-            # Store data for export
+
             self.current_data = results
-            
-            # Display results
+
             for row in results:
-                # Format the data
-                kode, side, price, lot, num, timestamp = row
-                side_text = "BID" if side == "B" else "ASK"
-                price_str = f"{float(price):,.2f}" if price else "N/A"
-                lot_str = f"{lot:,}" if lot else "N/A"
-                timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S") if timestamp else "N/A"
-                
-                self.tree.insert("", tk.END, values=(
-                    kode, side_text, price_str, lot_str, num, timestamp_str
-                ))
+                if self.bid_ask_filter_var.get():
+                    kode, price, bid_lot, ask_lot, timestamp = row
+                    
+                    # Handle None values
+                    price_str = f"{price:,.2f}" if price is not None else "0.00"
+                    bid_lot_str = f"{bid_lot:,}" if bid_lot is not None else "0"
+                    ask_lot_str = f"{ask_lot:,}" if ask_lot is not None else "0"
+                    timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S") if timestamp is not None else "N/A"
+                    multiplier = self.bid_multiplier_var.get()
+                    
+                    self.tree.insert("", tk.END, values=(
+                        kode or "N/A",
+                        f"B≥{multiplier}S",
+                        price_str,
+                        bid_lot_str,
+                        f"ASK:{ask_lot_str}",
+                        timestamp_str
+                    ))
+                else:
+                    kode, side, price, lot, num, timestamp = row
+                    
+                    # Handle None values
+                    side_text = "BID" if side == "B" else "ASK" if side == "S" else "N/A"
+                    price_str = f"{price:,.2f}" if price is not None else "0.00"
+                    lot_str = str(lot) if lot is not None else "0"
+                    num_str = str(num) if num is not None else "0"
+                    timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S") if timestamp is not None else "N/A"
+                    
+                    self.tree.insert("", tk.END, values=(
+                        kode or "N/A", 
+                        side_text, 
+                        price_str, 
+                        lot_str, 
+                        num_str,
+                        timestamp_str
+                    ))
+
             
             self.status_var.set(f"Found {len(results)} records")
             
@@ -272,8 +300,10 @@ class StockFilterGUI:
             messagebox.showerror("Query Error", f"Failed to execute query:\n{str(e)}")
             self.status_var.set("Error occurred")
         finally:
-            cursor.close()
-            conn.close()
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
     
     def clear_filter(self):
         """Clear all filters"""
@@ -284,6 +314,8 @@ class StockFilterGUI:
         self.lot_min_var.set("")
         self.lot_max_var.set("")
         self.limit_var.set("100")
+        self.bid_ask_filter_var.set(False)
+        self.bid_multiplier_var.set("4")
         
         # Clear results
         for item in self.tree.get_children():
@@ -299,8 +331,12 @@ class StockFilterGUI:
             return
         
         # Create DataFrame
-        df = pd.DataFrame(self.current_data, 
-                         columns=["kode", "side", "price", "lot", "num", "timestamp"])
+        if self.bid_ask_filter_var.get():
+            df = pd.DataFrame(self.current_data, 
+                             columns=["kode", "price", "bid_lot", "ask_lot", "timestamp"])
+        else:
+            df = pd.DataFrame(self.current_data, 
+                             columns=["kode", "side", "price", "lot", "num", "timestamp"])
         
         # Generate filename
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

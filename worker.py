@@ -5,7 +5,7 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent
 JOBS = [
-    ("pangdat", SCRIPT_DIR / "main.py"),
+    ("ajaib", SCRIPT_DIR / "main.py"),
     ("ipot", SCRIPT_DIR / "ipot_scrapping.py"),
 ]
 

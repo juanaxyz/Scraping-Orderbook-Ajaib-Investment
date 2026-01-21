@@ -1,5 +1,6 @@
 # NOTE: this script is depracated, for Ajaib's web scrapping, use pangdat-scrapping.py
 import asyncio
+from socket import timeout
 import aiohttp
 import pandas as pd
 from datetime import datetime
@@ -19,7 +20,8 @@ PASSWORD = os.getenv("PASSWORD")
 PIN_CODE = os.getenv("PINCODE")
 PIN_CHECK_INTERVAL = 3000
 
-CODES = pd.read_excel("daftar saham.xlsx")["Kode"].tolist()
+# CODES = pd.read_excel("Daftar 955 Saham.xlsx")["Kode"].tolist()
+CODES = pd.read_excel("Daftar 10 Saham.xlsx")["Kode"].tolist()
 URL = "https://ht2.ajaib.co.id/api/v1/stock/bestquote/"
 
 # Config Rate Limiting
@@ -119,7 +121,7 @@ async def login_and_get_headers(playwright):
 
     try:
         # Login
-        await page.goto(LOGIN_URL, timeout=15000)
+        await page.goto(LOGIN_URL, timeout=0)
         await page.fill('input[name=email]', EMAIL)
         await page.fill('input[name=password]', PASSWORD)
         await page.click('button[type=submit]')
@@ -140,7 +142,7 @@ async def login_and_get_headers(playwright):
 
         # Trigger API request
         print("📡 Triggering API request...")
-        await page.goto("https://invest.ajaib.co.id/home/saham/BBRI", wait_until="domcontentloaded")
+        await page.goto("https://invest.ajaib.co.id/home/saham/BBRI", wait_until="domcontentloaded", timeout=0)
 
         try:
             await asyncio.wait_for(headers_captured.wait(), timeout=10)
@@ -348,8 +350,8 @@ async def main():
             else:
                 print("\n❌ No valid data collected")
 
-            print("\n⏱️  Waiting 15 Minute before next run...\n")
-            time.sleep(900)  # 15 minutes
+            # print("\n⏱️  Waiting 15 Minute before next run...\n")
+            # time.sleep(900)  # 15 minutes
 
 
 if __name__ == "__main__":

@@ -46,13 +46,13 @@ class StockFilterGUI:
         
         # Bid/Ask Ratio Filter
         self.bid_ask_filter_var = tk.BooleanVar()
-        ttk.Label(filter_frame, text="Bid/Ask Filter:").grid(row=0, column=2, sticky=tk.W, padx=5, pady=5)
+        ttk.Label(filter_frame, text="Price Filter:").grid(row=0, column=2, sticky=tk.W, padx=5, pady=5)
         bid_ask_frame = ttk.Frame(filter_frame)
         bid_ask_frame.grid(row=0, column=3, sticky=tk.W, padx=5, pady=5)
         
         ttk.Checkbutton(
             bid_ask_frame,
-            text="Enable Bid ≥",
+            text="Bid Price ≥",
             variable=self.bid_ask_filter_var
         ).pack(side=tk.LEFT, padx=2)
         
@@ -61,7 +61,7 @@ class StockFilterGUI:
                                        values=["2", "3", "4", "5", "6", "7", "8", "9", "10"], 
                                        width=5, state="readonly")
         multiplier_combo.pack(side=tk.LEFT, padx=2)
-        ttk.Label(bid_ask_frame, text="x Ask").pack(side=tk.LEFT, padx=2)
+        ttk.Label(bid_ask_frame, text="x Ask Price").pack(side=tk.LEFT, padx=2)
         
         # Source selection
         ttk.Label(filter_frame, text="Data Source:").grid(row=1, column=0, sticky=tk.W, padx=5)
@@ -137,7 +137,7 @@ class StockFilterGUI:
         tree_scroll_x = ttk.Scrollbar(results_frame, orient=tk.HORIZONTAL)
         
         self.tree = ttk.Treeview(results_frame, 
-                                 columns=("Code", "Side", "Price", "Lot", "Num", "Timestamp"),
+                                 columns=("Code", "Timestamp", "Bid_Price", "Ask_Price", "Ratio", "Details"),
                                  show="headings",
                                  yscrollcommand=tree_scroll_y.set,
                                  xscrollcommand=tree_scroll_x.set)
@@ -147,18 +147,18 @@ class StockFilterGUI:
         
         # Define columns
         self.tree.heading("Code", text="Stock Code")
-        self.tree.heading("Side", text="Side")
-        self.tree.heading("Price", text="Price")
-        self.tree.heading("Lot", text="Lot")
-        self.tree.heading("Num", text="Number")
         self.tree.heading("Timestamp", text="Timestamp")
+        self.tree.heading("Bid_Price", text="Bid Price")
+        self.tree.heading("Ask_Price", text="Ask Price")
+        self.tree.heading("Ratio", text="Ratio")
+        self.tree.heading("Details", text="Details")
         
         self.tree.column("Code", width=80, anchor=tk.CENTER)
-        self.tree.column("Side", width=60, anchor=tk.CENTER)
-        self.tree.column("Price", width=100, anchor=tk.E)
-        self.tree.column("Lot", width=100, anchor=tk.E)
-        self.tree.column("Num", width=80, anchor=tk.CENTER)
         self.tree.column("Timestamp", width=180, anchor=tk.CENTER)
+        self.tree.column("Bid_Price", width=100, anchor=tk.E)
+        self.tree.column("Ask_Price", width=100, anchor=tk.E)
+        self.tree.column("Ratio", width=80, anchor=tk.CENTER)
+        self.tree.column("Details", width=200, anchor=tk.W)
         
         self.tree.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         tree_scroll_y.grid(row=0, column=1, sticky=(tk.N, tk.S))
@@ -185,27 +185,37 @@ class StockFilterGUI:
     def build_query(self):
         source = self.source_var.get()
         table = f"orderbook_{source}"
+        multiplier = self.bid_multiplier_var.get()
 
-        # Jika filter Bid >= Nx Ask aktif
+        # Jika filter Bid Price >= Nx Ask Price aktif
         if self.bid_ask_filter_var.get():
-            multiplier = self.bid_multiplier_var.get()
             query = f"""
             SELECT 
-                kode,
-                price,
-                SUM(CASE WHEN side = 'B' THEN lot ELSE 0 END) AS bid_lot,
-                SUM(CASE WHEN side = 'S' THEN lot ELSE 0 END) AS ask_lot,
-                MAX(timestamp) AS timestamp
-            FROM {table}
-            WHERE timestamp IS NOT NULL AND side IN ('B', 'S')
-            GROUP BY kode, price
-            HAVING bid_lot >= {multiplier} * ask_lot AND ask_lot > 0
-            ORDER BY timestamp DESC
+                b.kode,
+                b.timestamp,
+                b.price AS bid_price,
+                s.price AS ask_price,
+                b.lot AS bid_lot,
+                s.lot AS ask_lot
+            FROM {table} b
+            INNER JOIN {table} s 
+                ON b.kode = s.kode 
+                AND b.timestamp = s.timestamp
+            WHERE b.side = 'B' 
+                AND s.side = 'S'
+                AND b.timestamp IS NOT NULL
+                AND b.price >= {multiplier} * s.price
+            ORDER BY b.timestamp DESC
             """
+            
+            limit = self.limit_var.get()
+            if limit != "ALL":
+                query += f" LIMIT {limit}"
+            
             params = []
             return query, params
 
-        # Query normal
+        # Query normal (tidak diubah)
         query = f"""
             SELECT kode, side, price, lot, num, timestamp
             FROM {table}
@@ -237,6 +247,38 @@ class StockFilterGUI:
         for item in self.tree.get_children():
             self.tree.delete(item)
         
+        # Adjust columns based on filter type
+        if self.bid_ask_filter_var.get():
+            self.tree["columns"] = ("Code", "Timestamp", "Bid_Price", "Ask_Price", "Ratio", "Details")
+            self.tree.heading("Code", text="Stock Code")
+            self.tree.heading("Timestamp", text="Timestamp")
+            self.tree.heading("Bid_Price", text="Bid Price")
+            self.tree.heading("Ask_Price", text="Ask Price")
+            self.tree.heading("Ratio", text="Ratio")
+            self.tree.heading("Details", text="Details")
+            
+            self.tree.column("Code", width=80, anchor=tk.CENTER)
+            self.tree.column("Timestamp", width=180, anchor=tk.CENTER)
+            self.tree.column("Bid_Price", width=100, anchor=tk.E)
+            self.tree.column("Ask_Price", width=100, anchor=tk.E)
+            self.tree.column("Ratio", width=80, anchor=tk.CENTER)
+            self.tree.column("Details", width=200, anchor=tk.W)
+        else:
+            self.tree["columns"] = ("Code", "Side", "Price", "Lot", "Num", "Timestamp")
+            self.tree.heading("Code", text="Stock Code")
+            self.tree.heading("Side", text="Side")
+            self.tree.heading("Price", text="Price")
+            self.tree.heading("Lot", text="Lot")
+            self.tree.heading("Num", text="Number")
+            self.tree.heading("Timestamp", text="Timestamp")
+            
+            self.tree.column("Code", width=80, anchor=tk.CENTER)
+            self.tree.column("Side", width=60, anchor=tk.CENTER)
+            self.tree.column("Price", width=100, anchor=tk.E)
+            self.tree.column("Lot", width=100, anchor=tk.E)
+            self.tree.column("Num", width=80, anchor=tk.CENTER)
+            self.tree.column("Timestamp", width=180, anchor=tk.CENTER)
+        
         self.status_var.set("Fetching data...")
         self.root.update()
         
@@ -254,22 +296,29 @@ class StockFilterGUI:
 
             for row in results:
                 if self.bid_ask_filter_var.get():
-                    kode, price, bid_lot, ask_lot, timestamp = row
+                    kode, timestamp, bid_price, ask_price, bid_lot, ask_lot = row
                     
                     # Handle None values
-                    price_str = f"{price:,.2f}" if price is not None else "0.00"
-                    bid_lot_str = f"{bid_lot:,}" if bid_lot is not None else "0"
-                    ask_lot_str = f"{ask_lot:,}" if ask_lot is not None else "0"
+                    bid_price_val = bid_price if bid_price is not None else 0
+                    ask_price_val = ask_price if ask_price is not None else 0
+                    
+                    bid_price_str = f"{bid_price_val:,.2f}"
+                    ask_price_str = f"{ask_price_val:,.2f}"
+                    
+                    # Calculate ratio
+                    ratio = f"{(bid_price_val / ask_price_val):.2f}x" if ask_price_val > 0 else "N/A"
+                    
                     timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S") if timestamp is not None else "N/A"
-                    multiplier = self.bid_multiplier_var.get()
+                    
+                    details = f"BID:{bid_lot} lots | ASK:{ask_lot} lots"
                     
                     self.tree.insert("", tk.END, values=(
                         kode or "N/A",
-                        f"B≥{multiplier}S",
-                        price_str,
-                        bid_lot_str,
-                        f"ASK:{ask_lot_str}",
-                        timestamp_str
+                        timestamp_str,
+                        bid_price_str,
+                        ask_price_str,
+                        ratio,
+                        details
                     ))
                 else:
                     kode, side, price, lot, num, timestamp = row
@@ -333,7 +382,7 @@ class StockFilterGUI:
         # Create DataFrame
         if self.bid_ask_filter_var.get():
             df = pd.DataFrame(self.current_data, 
-                             columns=["kode", "price", "bid_lot", "ask_lot", "timestamp"])
+                             columns=["kode", "timestamp", "bid_price", "ask_price", "bid_lot", "ask_lot"])
         else:
             df = pd.DataFrame(self.current_data, 
                              columns=["kode", "side", "price", "lot", "num", "timestamp"])

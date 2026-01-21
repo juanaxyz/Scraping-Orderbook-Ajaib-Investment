@@ -41,6 +41,17 @@ CREATE TABLE IF NOT EXISTS `orderbook_ipot` (
   `timestamp` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE IF NOT EXISTS `ipot_overview` (
+  `kode` char(4) DEFAULT NULL,
+  `last_price` decimal(20,6) DEFAULT NULL,
+  `high` decimal(20,6) DEFAULT NULL,
+  `low` decimal(20,6) DEFAULT NULL,
+  `bid_qty` int(11) DEFAULT NULL,
+  `h_bid` decimal(20,6) DEFAULT NULL,
+  `timestamp` timestamp NULL DEFAULT NULL,
+  INDEX `idx_kode_timestamp` (`kode`, `timestamp`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- Data exporting was unselected.
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;

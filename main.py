@@ -1,4 +1,3 @@
-# NOTE: this script is depracated, for Ajaib's web scrapping, use pangdat-scrapping.py
 import asyncio
 from socket import timeout
 import aiohttp
